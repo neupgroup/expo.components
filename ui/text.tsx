@@ -3,10 +3,10 @@ import {
   type TextProps as NativeTextProps,
 } from 'react-native';
 
-import typographyJson from '$/typography.json';
-import outfitFonts from '$/fonts/outfitfonts';
-import { type ThemeColor } from '$/theme';
-import { useTheme } from '#/core/hooks/useTheme';
+import typographyJson from '@/base/typography.json';
+import outfitFonts from '@/base/fonts/outfitfonts';
+import { type ThemeColor } from '@/base/theme';
+import { useTheme } from '@/neup/core/hooks/useTheme';
 
 type TypographyDefinition = {
   location: string;
