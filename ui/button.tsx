@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } from 'react-native';
 import { useState, type ReactNode } from 'react';
-import { Text } from '@/neup/components/ui/text';
+import { Text } from '@neup/components/ui/text';
 
 type ButtonProps = Omit<PressableProps, 'children'> & {
   children: ReactNode;

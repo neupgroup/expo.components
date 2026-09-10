@@ -6,7 +6,7 @@ import {
 import typographyJson from '@/base/typography.json';
 import outfitFonts from '@/base/fonts/outfitfonts';
 import { type ThemeColor } from '@/base/theme';
-import { useTheme } from '@/neup/core/hooks/useTheme';
+import { useTheme } from '@neup/core/hooks/useTheme';
 
 type TypographyDefinition = {
   location: string;
