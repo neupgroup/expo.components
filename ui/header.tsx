@@ -3,6 +3,7 @@ import { Animated, Platform, Pressable, StyleSheet, View, type LayoutChangeEvent
 import { BlurView } from 'expo-blur';
 import { Text } from './text';
 import { BaseIcon } from '@/components/element/base-icon';
+import ArrowLeft from '@base/icons/arrow-left.svg';
 import theme from '@base/theme.json';
 
 export type ScrollHeaderProps = {
@@ -62,17 +63,19 @@ export function StickyPageHeader({ title, description, onBack, scrollY, headerHe
   const blurOpacity = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
 
   return (
-      <Animated.View pointerEvents="box-none" style={[styles.compactHeader, { shadowOpacity, elevation: compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0, Platform.OS === 'android' ? 4 : 2] }), transform: [{ translateY: compactTranslateY }] }]}>
-      {onBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={onBack} style={styles.compactBack}>
-        <BaseIcon name="arrow-left" size={21} color="#173d35" />
-      </Pressable> : null}
-      <View style={styles.compactText}>
-        <Animated.View style={{ opacity: textOpacity, transform: [{ translateY: textTranslateY }] }}>
-          <Text name="title3" numberOfLines={1} style={styles.compactTitle}>{title}</Text>
-        </Animated.View>
-        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: blurOpacity }]}>
-          <BlurView intensity={22} tint="light" style={StyleSheet.absoluteFill} />
-        </Animated.View>
+      <Animated.View pointerEvents="box-none" style={[styles.compactHeader, { shadowOpacity, elevation: compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0, Platform.OS === 'android' ? 4 : 2] }), transform: [{ translateY: compactTranslateY }] }]}> 
+      <View style={styles.compactRow}>
+        {onBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={onBack} style={styles.compactBack}>
+          <ArrowLeft width={21} height={21} fill="#173d35" color="#173d35" stroke="#173d35" strokeWidth={0.7} />
+        </Pressable> : null}
+        <View style={styles.compactText}>
+          <Animated.View style={{ opacity: textOpacity, transform: [{ translateY: textTranslateY }] }}>
+            <Text name="title3" numberOfLines={1} style={styles.compactTitle}>{title}</Text>
+          </Animated.View>
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: blurOpacity }]}> 
+            <BlurView intensity={22} tint="light" style={StyleSheet.absoluteFill} />
+          </Animated.View>
+        </View>
       </View>
     </Animated.View>
   );
@@ -84,8 +87,9 @@ const styles = StyleSheet.create({
   backLabel: { color: '#173d35' },
   title: {},
   description: { marginTop: theme.spacing.headingDescriptionGap, color: '#71817b' },
-  compactHeader: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 96, paddingTop: theme.spacing.space40, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space4, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: Platform.OS === 'ios' ? 5 : 5, flexDirection: 'row', alignItems: 'center' },
-  compactBack: { width: 34, height: 44, justifyContent: 'center', alignItems: 'flex-start' },
+  compactHeader: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 90, paddingTop: theme.spacing.space20, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space4, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: Platform.OS === 'ios' ? 5 : 5, justifyContent: 'flex-end' },
+  compactRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center' },
+  compactBack: { width: 28, height: 44, justifyContent: 'center', alignItems: 'flex-start' },
   compactText: { flex: 1, justifyContent: 'center' },
   compactTitle: { fontSize: 20, letterSpacing: -1.1, fontWeight: '400', flexShrink: 1 },
 });
