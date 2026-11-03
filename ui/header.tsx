@@ -1,44 +1,30 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Platform, Pressable, StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
+import { Animated, Platform, StyleSheet, View, type LayoutChangeEvent, type ReactNode, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Text } from './text';
-import { BaseIcon } from '@/components/element/base-icon';
-import ArrowLeft from '@base/icons/arrow-left.svg';
 import theme from '@base/theme.json';
 
-export type ScrollHeaderProps = {
-  title: string;
-  description?: string;
-  onBack?: () => void;
-  onHeightChange?: (height: number) => void;
+type HeaderContentProps = {
+  children: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
 
-// Render the expanded page header and report its natural height for scroll transitions.
-export function ScrollPageHeader({ title, description, onBack, onHeightChange, style }: ScrollHeaderProps) {
-  // Report the rendered layout height to the page that owns the scroll view.
+// Render user supplied content in the expanded header that scrolls with its page.
+export function HeaderSticky({ children, onHeightChange, style }: HeaderContentProps & { onHeightChange?: (height: number) => void }) {
+  // Report the expanded header height so the floating header knows when to appear.
   function handleHeaderLayout(event: LayoutChangeEvent) {
     onHeightChange?.(event.nativeEvent.layout.height);
   }
 
-  return (
-    <View onLayout={handleHeaderLayout} style={[styles.fullHeader, style]}>
-      {onBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={onBack} style={styles.fullBack}>
-        <BaseIcon name="arrow-left" size={18} color="#173d35" />
-        <Text name="regular" style={styles.backLabel}>Back</Text>
-      </Pressable> : null}
-      <Text name="title" style={styles.title}>{title}</Text>
-      {description ? <Text name="regular" style={styles.description}>{description}</Text> : null}
-    </View>
-  );
+  return <View onLayout={handleHeaderLayout} style={[styles.headerSticky, style]}>{children}</View>;
 }
 
-// Render the compact header and animate it against the measured expanded header height.
-export function StickyPageHeader({ title, description, onBack, scrollY, headerHeight }: ScrollHeaderProps & { onBack?: () => void; scrollY: Animated.Value; headerHeight: number }) {
+// Render user supplied content in the floating header after the expanded header scrolls away.
+export function HeaderFloating({ children, scrollY, headerHeight, style }: HeaderContentProps & { scrollY: Animated.Value; headerHeight: number }) {
   const compactProgress = useRef(new Animated.Value(0)).current;
   const visibleState = useRef(false);
   const transition = useRef<Animated.CompositeAnimation | null>(null);
 
+  // Animate the floating header as its scroll threshold is crossed.
   useEffect(() => {
     if (!headerHeight) return;
     const listenerId = scrollY.addListener(({ value }) => {
@@ -46,50 +32,28 @@ export function StickyPageHeader({ title, description, onBack, scrollY, headerHe
       if (shouldShow === visibleState.current) return;
       visibleState.current = shouldShow;
       transition.current?.stop();
-      transition.current = Animated.timing(compactProgress, {
-        toValue: shouldShow ? 1 : 0,
-        duration: 200,
-        useNativeDriver: false,
-      });
+      transition.current = Animated.timing(compactProgress, { toValue: shouldShow ? 1 : 0, duration: 200, useNativeDriver: false });
       transition.current.start();
     });
     return () => scrollY.removeListener(listenerId);
   }, [compactProgress, headerHeight, scrollY]);
 
-  const compactTranslateY = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [-110, 0] });
+  const translateY = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [-110, 0] });
   const shadowOpacity = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0, Platform.OS === 'ios' ? 0.09 : 0.1] });
-  const textOpacity = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
-  const textTranslateY = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [8, 0] });
+  const contentOpacity = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
+  const contentTranslateY = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [8, 0] });
   const blurOpacity = compactProgress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
 
-  return (
-      <Animated.View pointerEvents="box-none" style={[styles.compactHeader, { shadowOpacity, elevation: compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0, Platform.OS === 'android' ? 4 : 2] }), transform: [{ translateY: compactTranslateY }] }]}> 
-      <View style={styles.compactRow}>
-        {onBack ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={onBack} style={styles.compactBack}>
-          <ArrowLeft width={21} height={21} fill="#173d35" color="#173d35" stroke="#173d35" strokeWidth={0.7} />
-        </Pressable> : null}
-        <View style={styles.compactText}>
-          <Animated.View style={{ opacity: textOpacity, transform: [{ translateY: textTranslateY }] }}>
-            <Text name="title3" numberOfLines={1} style={styles.compactTitle}>{title}</Text>
-          </Animated.View>
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: blurOpacity }]}> 
-            <BlurView intensity={22} tint="light" style={StyleSheet.absoluteFill} />
-          </Animated.View>
-        </View>
-      </View>
-    </Animated.View>
-  );
+  return <Animated.View pointerEvents="box-none" style={[styles.headerFloating, style, { shadowOpacity, elevation: compactProgress.interpolate({ inputRange: [0, 1], outputRange: [0, Platform.OS === 'android' ? 4 : 2] }), transform: [{ translateY }] }]}>
+    <View style={styles.floatingRow}>
+      <Animated.View style={{ flex: 1, opacity: contentOpacity, transform: [{ translateY: contentTranslateY }] }}>{children}</Animated.View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: blurOpacity }]}><BlurView intensity={22} tint="light" style={StyleSheet.absoluteFill} /></Animated.View>
+    </View>
+  </Animated.View>;
 }
 
 const styles = StyleSheet.create({
-  fullHeader: { paddingTop: theme.spacing.space72, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space20 },
-  fullBack: { minHeight: 44, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: theme.spacing.space6 },
-  backLabel: { color: '#173d35' },
-  title: {},
-  description: { marginTop: theme.spacing.headingDescriptionGap, color: '#71817b' },
-  compactHeader: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 90, paddingTop: theme.spacing.space20, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space4, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: Platform.OS === 'ios' ? 5 : 5, justifyContent: 'flex-end' },
-  compactRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center' },
-  compactBack: { width: 28, height: 44, justifyContent: 'center', alignItems: 'flex-start' },
-  compactText: { flex: 1, justifyContent: 'center' },
-  compactTitle: { fontSize: 20, letterSpacing: -1.1, fontWeight: '400', flexShrink: 1 },
+  headerSticky: { paddingTop: theme.spacing.space72, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space20 },
+  headerFloating: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 90, paddingTop: theme.spacing.space20, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space4, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: 5, justifyContent: 'flex-end' },
+  floatingRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center' },
 });
