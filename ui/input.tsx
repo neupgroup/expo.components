@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TextInput as NativeTextInput,
   type TextInputProps as NativeTextInputProps,
-  type TextInput as NativeTextInputInstance,
+  type TextInputInstance as NativeTextInputInstance,
   View,
 } from 'react-native';
 import { Text } from '@neup/components/ui/text';
