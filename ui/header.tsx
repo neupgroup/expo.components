@@ -54,6 +54,6 @@ export function HeaderFloating({ children, scrollY, headerHeight, style }: Heade
 
 const styles = StyleSheet.create({
   headerSticky: { paddingTop: theme.spacing.space72, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space20 },
-  headerFloating: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 90, paddingTop: theme.spacing.space20, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space4, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: 5, justifyContent: 'flex-end' },
+  headerFloating: { position: 'absolute', zIndex: 5, top: 0, left: 0, right: 0, minHeight: 96, paddingTop: theme.spacing.space20, paddingHorizontal: theme.spacing.space20, paddingBottom: theme.spacing.space1, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5ebe7', shadowColor: '#173d35', shadowOffset: { width: 0, height: Platform.OS === 'ios' ? 2 : 3 }, shadowRadius: 5, justifyContent: 'flex-end' },
   floatingRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center' },
 });
