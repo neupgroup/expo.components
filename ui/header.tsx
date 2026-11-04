@@ -9,7 +9,7 @@ type HeaderContentProps = {
 };
 
 // Render user supplied content in the expanded header that scrolls with its page.
-export function HeaderSticky({ children, onHeightChange, style }: HeaderContentProps & { onHeightChange?: (height: number) => void }) {
+export function HeaderStatic({ children, onHeightChange, style }: HeaderContentProps & { onHeightChange?: (height: number) => void }) {
   // Report the expanded header height so the floating header knows when to appear.
   function handleHeaderLayout(event: LayoutChangeEvent) {
     onHeightChange?.(event.nativeEvent.layout.height);
